@@ -136,19 +136,19 @@ header h1 {
 .spinner { width: 56px; height: 56px; border: 5px solid var(--bg-color); border-bottom-color: var(--primary-blue); border-radius: 50%; display: inline-block; animation: rotation 1s linear infinite; }
 @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-/* RESULT STAGE - MOBILE-FIRST BENTO GRID (WITH ALIGNMENT FIX) */
+/* --- MODIFIED SECTION START --- */
+
+/* RESULT STAGE - MOBILE-FIRST BENTO GRID */
 #result-stage {
     display: grid;
     gap: var(--gap);
     overflow-y: auto;
     padding: var(--gap);
     background: var(--bg-color);
-    grid-template-columns: repeat(2, 1fr);
-    grid-auto-rows: min-content;
-    
-    /* --- FIX: Center the grid content horizontally and align rows to the top --- */
-    justify-content: center;
     align-content: start;
+    
+    /* --- CHANGE 1: Default to a single column for mobile-first compatibility --- */
+    grid-template-columns: 1fr;
 }
 #result-stage::-webkit-scrollbar { display: none; }
 
@@ -167,29 +167,24 @@ header h1 {
 .fact-item .material-symbols-rounded { color: var(--primary-blue); font-size: 20px; }
 
 #result-footer {
-    grid-column: 1 / -1; padding: 1rem; text-align: center;
+    padding: 1rem; text-align: center;
     font-size: 0.75rem; color: var(--text-light);
 }
 
-/* Mobile Bento Card Layout */
-#card-identity { grid-column: 1 / 3; padding: 0; overflow: hidden; height: 250px; }
+/* Mobile Base Card Layout (Single Column) */
+#card-identity { padding: 0; overflow: hidden; height: 250px; }
 #card-identity img { width: 100%; height: 100%; object-fit: cover; }
 #identity-overlay { padding: 1rem var(--padding); background: linear-gradient(to top, rgba(0,0,0,0.8), transparent 80%); position: absolute; bottom: 0; left: 0; right: 0; color: white; }
 #identity-overlay h2 { font-size: 1.8rem; font-weight: 700; }
 #identity-overlay p { font-size: 0.9rem; opacity: 0.9; }
 
-#card-key-facts { grid-column: 1 / 3; }
-#card-composition { grid-column: 1 / 2; }
-#card-recycle-level { grid-column: 2 / 3; }
-#card-impact { grid-column: 1 / 3; }
-#card-actions { grid-column: 1 / 3; }
-#card-tips { grid-column: 1 / 3; }
-#reset-button-container { grid-column: 1 / 3; }
-
 .status-chip { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 100px; font-weight: 600; font-size: 0.9rem; }
 .status-chip.green { background-color: #e5f8e9; color: var(--status-green); }
 .status-chip.yellow { background-color: #fff4e5; color: var(--status-yellow); }
 .status-chip.red { background-color: #ffe8e6; color: var(--status-red); }
+
+/* --- MODIFIED SECTION END --- */
+
 
 /* 4. SETTINGS MODAL */
 #settings-modal {
@@ -232,15 +227,37 @@ header h1 {
 .btn.secondary { background-color: var(--bg-color); color: var(--primary-blue); }
 input[type="file"] { display: none; }
 
-/* RESPONSIVE DESKTOP DESIGN */
+
+/* --- MODIFIED SECTION: RESPONSIVE DESIGN --- */
+
+/* Tablet & Large Phone Layout (>= 500px) */
+@media (min-width: 500px) {
+    main { max-width: 500px; } /* Slightly increase max-width */
+    #result-stage {
+        /* --- CHANGE 2: Introduce the 2-column grid at this breakpoint --- */
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    /* Re-introduce the specific grid spans for the 2-column layout */
+    #card-identity { grid-column: 1 / 3; }
+    #card-key-facts { grid-column: 1 / 3; }
+    #card-composition { grid-column: 1 / 2; }
+    #card-recycle-level { grid-column: 2 / 3; }
+    #card-impact { grid-column: 1 / 3; }
+    #card-actions { grid-column: 1 / 3; }
+    #card-tips { grid-column: 1 / 3; }
+    #reset-button-container, #result-footer { grid-column: 1 / 3; }
+}
+
+/* Desktop Layout (>= 768px) */
 @media (min-width: 768px) {
     main { max-width: 1000px; }
     #result-stage {
-        /* The grid is redefined for larger screens */
+        /* --- CHANGE 3: The 4-column grid for desktop overrides the previous styles --- */
         grid-template-columns: repeat(4, 1fr);
     }
     
-    /* Card placement is re-shuffled for the desktop bento grid */
+    /* Card placement is re-shuffled for the optimal desktop bento grid */
     #card-identity { grid-column: 1 / 3; grid-row: 1 / 3; height: auto; }
     #card-key-facts { grid-column: 3 / 5; grid-row: 1 / 2; }
     #card-recycle-level { grid-column: 3 / 4; grid-row: 2 / 3; }
@@ -248,5 +265,5 @@ input[type="file"] { display: none; }
     #card-actions { grid-column: 1 / 3; grid-row: 3 / 4; }
     #card-impact { grid-column: 3 / 4; grid-row: 3 / 4; }
     #card-tips { grid-column: 4 / 5; grid-row: 3 / 4; }
-    #reset-button-container { grid-column: 1 / 5; }
+    #reset-button-container, #result-footer { grid-column: 1 / 5; }
 }
