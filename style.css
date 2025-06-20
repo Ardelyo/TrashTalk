@@ -1,0 +1,252 @@
+/* 1. RESET & V7.1 DESIGN SYSTEM */
+:root {
+    /* Palette */
+    --bg-color: #F0F5FF; /* Softer blue background */
+    --surface-color: #FFFFFF; /* White cards */
+    --primary-blue: #0052FF;
+    --text-dark: #1F1F1F;
+    --text-medium: #555555;
+    --text-light: #888888;
+    --status-green: #34C759;
+    --status-yellow: #FF9500;
+    --status-red: #FF3B30;
+    --border-color: #EAEAEA;
+
+    /* Typography */
+    --font-main: 'Poppins', sans-serif;
+    
+    /* Elevation (Shadows) */
+    --shadow-1: 0 1px 3px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-2: 0 4px 6px rgba(0,0,0,0.03), 0 1px 3px rgba(0,0,0,0.06);
+    --shadow-3: 0 10px 15px rgba(0,0,0,0.04), 0 4px 6px rgba(0,0,0,0.08);
+    
+    /* Spacing & Radius */
+    --card-radius: 24px;
+    --main-radius: 48px;
+    --padding: 1.25rem;
+    --gap: 1rem;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; width: 100%; font-family: var(--font-main); }
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    background-color: var(--bg-color);
+    overflow: hidden; /* Prevent body scroll for app-like feel */
+}
+
+/* 2. MAIN LAYOUT */
+main {
+    width: 100%;
+    max-width: 480px; /* Mobile-first constraint */
+    height: 95%;
+    max-height: 900px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-align: center;
+    color: var(--text-dark);
+}
+
+#app-container {
+    flex-grow: 1;
+    border-radius: var(--main-radius);
+    background: #000;
+    border: 1px solid #e0e0e0;
+    box-shadow: var(--shadow-3);
+    position: relative;
+    overflow: hidden;
+}
+
+.stage {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0; left: 0;
+    display: flex;
+    visibility: hidden;
+    opacity: 0;
+}
+
+/* 3. STAGES STYLING */
+
+/* INPUT STAGE (CAMERA VIEW) */
+#input-stage { padding: 0; }
+#viewfinder-container {
+    width: 100%; height: 100%;
+    border-radius: var(--main-radius);
+    overflow: hidden; position: relative; background: #111;
+}
+#video-stream, #image-preview { width: 100%; height: 100%; object-fit: cover; }
+
+#camera-error-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-color: var(--surface-color);
+    color: var(--text-medium);
+    display: none; /* Hidden by default */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 2rem;
+}
+#camera-error-overlay .material-symbols-rounded {
+    font-size: 64px;
+    color: var(--primary-blue);
+    margin-bottom: 1rem;
+}
+
+#controls-overlay {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 1.5rem 2rem;
+    display: flex; justify-content: space-between; align-items: center;
+    background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+}
+#shutter-button {
+    width: 70px; height: 70px; border-radius: 50%; background-color: #fff;
+    border: 5px solid #fff; box-shadow: 0 0 0 3px rgba(0,0,0,0.3);
+    cursor: pointer; outline: none; transition: transform 0.1s ease;
+}
+#shutter-button:active { transform: scale(0.9); }
+.control-btn { background: none; border: none; color: white; cursor: pointer; opacity: 0.8; padding: 0.5rem; }
+.control-btn:hover { opacity: 1; }
+.control-btn .material-symbols-rounded { font-size: 36px; }
+
+#analyze-button {
+    position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+    visibility: hidden; opacity: 0;
+}
+
+/* LOADING STAGE */
+#loading-stage {
+    justify-content: center; align-items: center; flex-direction: column; gap: 2rem;
+    background: var(--surface-color);
+}
+#loading-stage p { font-size: 1.1rem; font-weight: 500; color: var(--text-medium); }
+.spinner { width: 56px; height: 56px; border: 5px solid var(--bg-color); border-bottom-color: var(--primary-blue); border-radius: 50%; display: inline-block; animation: rotation 1s linear infinite; }
+@keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* RESULT STAGE - MOBILE-FIRST BENTO GRID (WITH ALIGNMENT FIX) */
+#result-stage {
+    display: grid;
+    gap: var(--gap);
+    overflow-y: auto;
+    padding: var(--gap);
+    background: var(--bg-color);
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: min-content;
+    
+    /* --- FIX: Center the grid content horizontally and align rows to the top --- */
+    justify-content: center;
+    align-content: start;
+}
+#result-stage::-webkit-scrollbar { display: none; }
+
+.bento-card {
+    background-color: var(--surface-color); border-radius: var(--card-radius);
+    padding: var(--padding); box-shadow: var(--shadow-2);
+    display: flex; flex-direction: column; gap: 0.75rem;
+    position: relative; /* For overlays */
+}
+.bento-card h3 { font-size: 1rem; font-weight: 600; color: var(--primary-blue); margin: 0; }
+.card-content { font-size: 0.9rem; line-height: 1.7; color: var(--text-medium); }
+.card-content ul { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+.card-content strong { color: var(--text-dark); }
+
+.fact-item { display: flex; align-items: center; gap: 0.75rem; font-size: 0.9rem; }
+.fact-item .material-symbols-rounded { color: var(--primary-blue); font-size: 20px; }
+
+#result-footer {
+    grid-column: 1 / -1; padding: 1rem; text-align: center;
+    font-size: 0.75rem; color: var(--text-light);
+}
+
+/* Mobile Bento Card Layout */
+#card-identity { grid-column: 1 / 3; padding: 0; overflow: hidden; height: 250px; }
+#card-identity img { width: 100%; height: 100%; object-fit: cover; }
+#identity-overlay { padding: 1rem var(--padding); background: linear-gradient(to top, rgba(0,0,0,0.8), transparent 80%); position: absolute; bottom: 0; left: 0; right: 0; color: white; }
+#identity-overlay h2 { font-size: 1.8rem; font-weight: 700; }
+#identity-overlay p { font-size: 0.9rem; opacity: 0.9; }
+
+#card-key-facts { grid-column: 1 / 3; }
+#card-composition { grid-column: 1 / 2; }
+#card-recycle-level { grid-column: 2 / 3; }
+#card-impact { grid-column: 1 / 3; }
+#card-actions { grid-column: 1 / 3; }
+#card-tips { grid-column: 1 / 3; }
+#reset-button-container { grid-column: 1 / 3; }
+
+.status-chip { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 100px; font-weight: 600; font-size: 0.9rem; }
+.status-chip.green { background-color: #e5f8e9; color: var(--status-green); }
+.status-chip.yellow { background-color: #fff4e5; color: var(--status-yellow); }
+.status-chip.red { background-color: #ffe8e6; color: var(--status-red); }
+
+/* 4. SETTINGS MODAL */
+#settings-modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    display: flex; justify-content: center; align-items: center;
+    background-color: rgba(0,0,0,0.5);
+    backdrop-filter: blur(5px);
+    z-index: 1000;
+    visibility: hidden; opacity: 0;
+    transition: visibility 0s 0.3s, opacity 0.3s ease;
+}
+#settings-modal.visible { visibility: visible; opacity: 1; transition-delay: 0s; }
+
+.modal-content {
+    background: var(--surface-color); padding: 2rem; border-radius: var(--card-radius);
+    box-shadow: var(--shadow-3); width: 90%; max-width: 500px;
+    display: flex; flex-direction: column; gap: 1.5rem; position: relative;
+}
+.modal-content h2 { color: var(--text-dark); margin-bottom: 0.5rem; }
+#close-settings-btn { position: absolute; top: 1rem; right: 1rem; background: none; border: none; cursor: pointer; color: var(--text-light); }
+#close-settings-btn:hover { color: var(--text-dark); }
+
+.form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+.form-group label { font-weight: 600; font-size: 0.9rem; color: var(--text-medium); }
+.form-group input, .form-group select {
+    padding: 0.75rem; border: 1px solid var(--border-color);
+    border-radius: 8px; font-family: var(--font-main); font-size: 1rem;
+}
+.form-group input:focus, .form-group select:focus { outline: 2px solid var(--primary-blue); border-color: var(--primary-blue); }
+.form-actions { display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem; }
+
+/* Generic Components */
+.btn {
+    padding: 0.8rem 1.75rem; font-size: 1rem; font-weight: 600;
+    border: none; border-radius: 100px; cursor: pointer;
+    background-color: var(--primary-blue); color: white;
+    transition: all 0.2s ease; box-shadow: var(--shadow-1);
+}
+.btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-2); }
+.btn.secondary { background-color: var(--bg-color); color: var(--primary-blue); }
+input[type="file"] { display: none; }
+
+/* RESPONSIVE DESKTOP DESIGN */
+@media (min-width: 768px) {
+    main { max-width: 1000px; }
+    #result-stage {
+        /* The grid is redefined for larger screens */
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    /* Card placement is re-shuffled for the desktop bento grid */
+    #card-identity { grid-column: 1 / 3; grid-row: 1 / 3; height: auto; }
+    #card-key-facts { grid-column: 3 / 5; grid-row: 1 / 2; }
+    #card-recycle-level { grid-column: 3 / 4; grid-row: 2 / 3; }
+    #card-composition { grid-column: 4 / 5; grid-row: 2 / 3; }
+    #card-actions { grid-column: 1 / 3; grid-row: 3 / 4; }
+    #card-impact { grid-column: 3 / 4; grid-row: 3 / 4; }
+    #card-tips { grid-column: 4 / 5; grid-row: 3 / 4; }
+    #reset-button-container { grid-column: 1 / 5; }
+}
